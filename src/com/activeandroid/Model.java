@@ -42,7 +42,7 @@ public abstract class Model {
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	private Long mId = null;
+    private Long mId;
 
 	private final TableInfo mTableInfo;
 	private final String idName;
@@ -59,8 +59,12 @@ public abstract class Model {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public final Long getId() {
+	public Long getId() {
 		return mId;
+	}
+
+	public void setId(Long id) {
+		this.mId = id;
 	}
 
 	public final void delete() {
@@ -68,7 +72,7 @@ public abstract class Model {
 		Cache.removeEntity(this);
 
 		Cache.getContext().getContentResolver()
-				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
+				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), getId()), null);
 	}
 
 	public final Long save() {
@@ -151,16 +155,18 @@ public abstract class Model {
 			}
 		}
 
-		if (mId == null) {
-			mId = db.insert(mTableInfo.getTableName(), null, values);
+        Long id = getId();
+		if (id == null) {
+            id = db.insert(mTableInfo.getTableName(), null, values);
+            setId(id);
 		}
 		else {
-			db.update(mTableInfo.getTableName(), values, idName+"=" + mId, null);
+			db.update(mTableInfo.getTableName(), values, idName+"=" + id, null);
 		}
 
 		Cache.getContext().getContentResolver()
-				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
-		return mId;
+				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), id), null);
+		return id;
 	}
 
 	// Convenience methods
@@ -276,7 +282,7 @@ public abstract class Model {
 			}
 		}
 
-		if (mId != null) {
+		if (getId() != null) {
 			Cache.addEntity(this);
 		}
 	}
@@ -300,10 +306,11 @@ public abstract class Model {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Model && this.mId != null) {
+        Long id = getId();
+		if (obj instanceof Model && id != null) {
 			final Model other = (Model) obj;
 
-			return this.mId.equals(other.mId)							
+			return id.equals(other.getId())
 							&& (this.mTableInfo.getTableName().equals(other.mTableInfo.getTableName()));
 		} else {
 			return this == obj;
@@ -313,7 +320,8 @@ public abstract class Model {
 	@Override
 	public int hashCode() {
 		int hash = HASH_PRIME;
-		hash += HASH_PRIME * (mId == null ? super.hashCode() : mId.hashCode()); //if id is null, use Object.hashCode()
+        Long id = getId();
+		hash += HASH_PRIME * (id == null ? super.hashCode() : id.hashCode()); //if id is null, use Object.hashCode()
 		hash += HASH_PRIME * mTableInfo.getTableName().hashCode();
 		return hash; //To change body of generated methods, choose Tools | Templates.
 	}
