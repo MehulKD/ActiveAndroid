@@ -157,6 +157,7 @@ public abstract class Model {
 
         Long id = getId();
 		if (id == null) {
+			db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
             id = db.insert(mTableInfo.getTableName(), null, values);
             setId(id);
 		}
