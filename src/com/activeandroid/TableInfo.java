@@ -58,9 +58,7 @@ public final class TableInfo {
             mTableName = type.getSimpleName();
         }
 
-        // Manually add the id column since it is not declared like the other columns.
-//        Field idField = getIdField(type);
-//        mColumnNames.put(idField, mIdName);
+        boolean hasIdField = false;
 
         List<Field> fields = new LinkedList<Field>(ReflectionUtils.getDeclaredColumnFields(type));
         Collections.reverse(fields);
@@ -73,8 +71,18 @@ public final class TableInfo {
                     columnName = field.getName();
                 }
 
+                if (columnName.equals(mIdName)) {
+                    hasIdField = true;
+                }
+
                 mColumnNames.put(field, columnName);
             }
+        }
+
+        // Manually add the id column since it is not declared like the other columns.
+        if (!hasIdField) {
+            Field idField = getIdField(type);
+            mColumnNames.put(idField, mIdName);
         }
 
     }
